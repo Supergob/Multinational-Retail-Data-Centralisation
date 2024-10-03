@@ -17,15 +17,27 @@ class DataExtractor:
         else:
             return f"Error: {response.status_code}"
     @staticmethod
-    def retrieve_stores_data(retrieve_stores_endpoint, headers):
-        response = requests.get(retrieve_stores_endpoint, headers=headers)
-        if response.status_code == 200:
-            raw_stores_returned = response.json()
-            stores_returned = pd.DataFrame(raw_stores_returned)
+    def retrieve_stores_data(num_stores, retrieve_stores_endpoint, headers): #   <--------- Current task
+        list_stores_returned =[]
+        
+        for store_number in range(0 ,num_stores):
+            stores_returned = pd.DataFrame(list_stores_returned)
+            store_url = f"{retrieve_stores_endpoint}/{store_number}"
+            response = requests.get(store_url, headers=headers)
+            
+            if response.status_code == 200:
+                store_data = response.json()
+                list_stores_returned.append(store_data)
+            
+            else:
+                print(f"failed to retrieve store{store_number}, Status code: {response.status_code}")
+        
+        if list_stores_returned:
+            stores_returned = pd.DataFrame(list_stores_returned)
             return stores_returned
         else:
-            if response.status_code != 200:
-                return f"Error: {response.status_code}"
+            return "Error, Empty DataFrame"
+        
             
     def read_rds_table(self, engine, table_name):
         query = f"SELECT * FROM legacy_users"
@@ -51,6 +63,7 @@ if __name__== "__main__":
     #print(user_data_df)
     headers = {"x-api-key":"yFBQbwXe9J3sd6zWVAMrK6lcxxr0q1lr2PT6DDMX"}
     number_of_stores_endpoint = "https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores"
-    retrieve_stores_endpoint = "https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{451}"
+    retrieve_stores_endpoint = "https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details"
     #print(DataExtractor.list_number_of_stores(number_of_stores_endpoint,headers))
-    print(DataExtractor.retrieve_stores_data(retrieve_stores_endpoint,headers))
+    number_of_stores = 450
+    print(DataExtractor.retrieve_stores_data(number_of_stores,retrieve_stores_endpoint,headers))
