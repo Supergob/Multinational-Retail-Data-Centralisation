@@ -3,6 +3,8 @@ import pandas as pd
 import utilities
 import requests
 import tabula
+import boto3
+from io import StringIO
 class DataExtractor:
     @staticmethod
     def list_db_tables(engine):
@@ -17,7 +19,7 @@ class DataExtractor:
         else:
             return f"Error: {response.status_code}"
     @staticmethod
-    def retrieve_stores_data(num_stores, retrieve_stores_endpoint, headers): #   <--------- Current task
+    def retrieve_stores_data(num_stores, retrieve_stores_endpoint, headers): 
         list_stores_returned =[]
         
         for store_number in range(0 ,num_stores):
@@ -37,8 +39,7 @@ class DataExtractor:
             return stores_returned
         else:
             return "Error, Empty DataFrame"
-        
-            
+              
     def read_rds_table(self, engine, table_name):
         query = f"SELECT * FROM legacy_users"
         read_data = pd.read_sql_query(query, engine)
@@ -52,7 +53,14 @@ class DataExtractor:
             raise ValueError('Not everything in here is a list')
         return data_to_convert
 
-
+    @staticmethod
+    def extract_from_s3(address):
+        s3 = boto3.client('s3')
+        target_address = s3.get_object(Bucket='data-handling-public', Key='products.csv')
+        raw_csv = s3_data = target_address['Body'].read().decode('utf-8')
+        extracted_data = pd.read_csv(StringIO(raw_csv))
+        return extracted_data
+        
 if __name__== "__main__":
     engine = utilities.engine
     user_data_table = 'legacy_users'  # Replace with the actual table name for user data
@@ -66,4 +74,7 @@ if __name__== "__main__":
     retrieve_stores_endpoint = "https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details"
     #print(DataExtractor.list_number_of_stores(number_of_stores_endpoint,headers))
     number_of_stores = 450
-    print(DataExtractor.retrieve_stores_data(number_of_stores,retrieve_stores_endpoint,headers))
+    #print(DataExtractor.retrieve_stores_data(number_of_stores,retrieve_stores_endpoint,headers))
+    address = 's3://data-handling-public/products.csv'
+    print(DataExtractor.extract_from_s3(address).head(3))
+    
