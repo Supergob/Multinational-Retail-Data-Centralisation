@@ -109,6 +109,8 @@ if __name__ == "__main__":
     extractor = data_extraction.DataExtractor()   
        
     # Upload the cleaned user details
+    # def clean_user_data(user_data_df):
+    # df_to_clean = data_extraction.DataExtractor().read_rds_table(utilities.engine, user_data_df)
     
     # user_data_table = 'legacy_users'
     # user_data_df = extractor.read_rds_table(engine, user_data_table)    
@@ -140,6 +142,7 @@ if __name__ == "__main__":
     
     # address = 's3://data-handling-public/products.csv'
     # extracted_s3_data = data_extraction.DataExtractor.extract_from_s3(address)
+    
     # cleaned_product_data = DataCleaning.clean_products_data(extracted_s3_data)
     # db_connector = database_utils.DatabaseConnector()
     # db_connector.upload_to_db(cleaned_product_data, 'dim_products','sales_db_creds.yaml')
