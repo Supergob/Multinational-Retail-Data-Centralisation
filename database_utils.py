@@ -23,7 +23,7 @@ class DatabaseConnector:
         DATABASE = creds.get('DATABASE') or creds.get('RDS_DATABASE')
         upload_string = f"{DATABASE_TYPE}+{DBAPI}://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}"
         upload_engine = create_engine(upload_string)       
-        df.to_sql('dim_users',upload_engine, if_exists = 'replace', index=False)
+        df.to_sql(table_name, upload_engine, if_exists = 'replace', index=False)
 
 if __name__ == "__main__":
     
