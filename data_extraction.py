@@ -39,9 +39,9 @@ class DataExtractor:
             return stores_returned
         else:
             return "Error, Empty DataFrame"
-              
-    def read_rds_table(self, engine, table_name):
-        query = f"SELECT * FROM legacy_users"
+    @staticmethod         
+    def read_rds_table(engine, table_name):
+        query = f"SELECT * FROM {table_name}"
         read_data = pd.read_sql_query(query, engine)
         return read_data
     @staticmethod
@@ -63,7 +63,7 @@ class DataExtractor:
         
 if __name__== "__main__":
     engine = utilities.engine
-    user_data_table = 'legacy_users'  # Replace with the actual table name for user data
+    user_data_table = 'orders_table'  # Replace with the actual table name for user data
     extractor = DataExtractor()
     user_data_df = extractor.read_rds_table(engine, user_data_table)
     gets = DataExtractor.retrieve_pdf_data('https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf')
@@ -76,5 +76,7 @@ if __name__== "__main__":
     number_of_stores = 450
     #print(DataExtractor.retrieve_stores_data(number_of_stores,retrieve_stores_endpoint,headers))
     address = 's3://data-handling-public/products.csv'
-    print(DataExtractor.extract_from_s3(address).head(3))
+    print(DataExtractor.list_db_tables(engine))
+    
+    print(DataExtractor.read_rds_table(engine,user_data_table))
     
