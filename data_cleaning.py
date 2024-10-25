@@ -18,7 +18,7 @@ class DataCleaning:
         return cleaned_user_data
 
     
-    @staticmethod
+    @staticmethodgit 
     def clean_card_data(link): 
         raw_data = extractor.retrieve_pdf_data(link)    
         raw_data = raw_data.replace('NULL', np.nan)
@@ -76,7 +76,6 @@ class DataCleaning:
         extracted_s3_data.dropna(subset = ['weight'], inplace = True)
         extracted_s3_data.drop('Unnamed: 0', axis = 1, inplace = True)
         cleaned_product_weights = extracted_s3_data
-        
         return cleaned_product_weights
           
     @staticmethod
@@ -116,7 +115,6 @@ if __name__ == "__main__":
     # cleaned__user_df = DataCleaning.clean_user_data(user_data_df)                                                                               
     # db_connector = database_utils.DatabaseConnector()        
     # db_connector.upload_to_db(cleaned__user_df, 'dim_users','sales_db_creds.yaml')
-    # #print(DataCleaning.clean_user_data(user_data_df))
     # print("Cleaned user data uploaded successfully!")
     
     # # Upload the cleaned card data
@@ -125,7 +123,6 @@ if __name__ == "__main__":
     # cleaned_card_df = DataCleaning.clean_card_data(link)
     # db_connector = database_utils.DatabaseConnector()
     # db_connector.upload_to_db(cleaned_card_df, 'dim_card_details', 'sales_db_creds.yaml')
-    # #print(DataCleaning.clean_card_data(link))
     # print('Cleaned card details uploaded succesfully!')
     
     # # Upload the cleaned store data
@@ -137,7 +134,6 @@ if __name__ == "__main__":
     # cleaned_store_df = DataCleaning.clean_store_data(number_of_stores, retrieve_stores_endpoint, headers)         
     # db_connector = database_utils.DatabaseConnector()
     # db_connector.upload_to_db(cleaned_store_df, 'dim_store_details','sales_db_creds.yaml')
-    # #print(DataCleaning.clean_store_data(number_of_stores, retrieve_stores_endpoint, headers))
     # print('Cleaned store details uploaded succesfully!')
 
     # # Upload the cleaned products data
