@@ -18,7 +18,7 @@ class DataCleaning:
         return cleaned_user_data
 
     
-    @staticmethodgit 
+    @staticmethod
     def clean_card_data(link): 
         raw_data = extractor.retrieve_pdf_data(link)    
         raw_data = raw_data.replace('NULL', np.nan)
