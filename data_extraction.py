@@ -60,10 +60,16 @@ class DataExtractor:
         raw_csv = s3_data = target_address['Body'].read().decode('utf-8')
         extracted_data = pd.read_csv(StringIO(raw_csv))
         return extracted_data
-        
+    @staticmethod
+    def extract_from_s3_json(json_address):
+        s3 = boto3.client('s3')
+        target_address = s3.get_object(Bucket='data-handling-public', Key='date_details.json')
+        raw_json = s3_data = target_address['Body'].read().decode('utf-8')
+        extracted_data = pd.read_json(StringIO(raw_json))
+        return extracted_data
 if __name__== "__main__":
     engine = utilities.engine
-    user_data_table = 'orders_table'  # Replace with the actual table name for user data
+    user_data_table = 'orders_table'  # Replace with the actual table name for the table you need to retrieve data from
     extractor = DataExtractor()
     user_data_df = extractor.read_rds_table(engine, user_data_table)
     gets = DataExtractor.retrieve_pdf_data('https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf')
@@ -76,7 +82,9 @@ if __name__== "__main__":
     number_of_stores = 450
     #print(DataExtractor.retrieve_stores_data(number_of_stores,retrieve_stores_endpoint,headers))
     address = 's3://data-handling-public/products.csv'
-    print(DataExtractor.list_db_tables(engine))
+    #print(DataExtractor.list_db_tables(engine))
     
-    print(DataExtractor.read_rds_table(engine,user_data_table))
-    
+    #print(DataExtractor.read_rds_table(engine,user_data_table))
+    addresss = 'https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json'
+    #print(DataExtractor.extract_from_s3_json(addresss))
+    print(DataExtractor.read_rds_table(engine, 'legacy_users'))
