@@ -1,0 +1,116 @@
+
+-- How many stores does the business have and in which countries?
+
+Select country_code, 
+count(store_type) as total_no_stores
+from dim_store_details
+group by country_code
+order by total_no_stores desc;
+
+-- Which locations currently have the most stores?
+
+Select locality,
+count(store_type) as total_no_stores
+from dim_store_details
+group by locality
+order by total_no_stores desc;
+
+--which months produced the largest amount of sales?
+
+select dt.month,
+sum(dp.product_price * o.product_quantity) as total_sales
+from dim_products dp
+inner join orders_table o on o.product_code = dp.product_code
+inner join dim_date_times ds on ds.date_uuid = o.date_uuid
+group by dt.month
+order by dt.month;
+
+-- How many sales are online vs offline?
+
+SELECT
+count(o.index) as number_of_sales,
+sum(o.product_quantity) as product_quantity_count,
+case
+    WHEN ds.store_type = 'Web Portal' Then 'Web Portal'
+    else 'Offline'
+end as location
+From orders_table o 
+inner join dim_products dp on dp.product_code = o.product_code
+INNER JOIN dim_store_details ds on ds.store_code = o.store_code
+group by location
+order by location desc;
+
+--What percentage of sales come through each type of store?
+
+with store_data as(
+    select ds.store_type, sum(
+        case
+            when ds.store_type in('Local','Web Portal','Super Store','Mall Kiosk','Outlet')
+            then dp.product_price * o.product_quantity
+            end) as total_sales
+            
+from dim_store_details ds
+inner join orders_table o on o.store_code = ds.store_code
+inner join dim_products dp on dp.product_code = o.product_code
+group by store_type),
+
+grand_total as (
+    select sum(total_sales) as total_sales_sum
+from store_data
+)
+select
+    store_data.store_type,
+    store_data.total_sales,
+    round((store_data.total_sales / grand_total.total_sales_sum) * 100,2) as sales_made
+    from store_data
+	cross join grand_total
+    order by sales_made desc;
+
+-- Which month in each year produced the highest cost of sales?
+
+select sum(o.product_quantity * dp.product_price) as total_sales,
+dt.year as year, dt.month as month
+from orders_table o
+inner join dim_date_times dt on dt.date_uuid = o.date_uuid
+inner join dim_products dp on dp.product_code = o.product_code
+group by dt.month, dt.year
+order by total_sales desc
+limit 10;
+
+-- What is our staff headcount?
+
+select sum(staff_numbers) as total_staff_count, country_code
+from dim_store_details
+group by country_code
+order by total_staff_count desc;
+
+-- Which German store is making the most sales?
+
+select sum(dp.product_price * o.product_quantity) as total_sales,ds.store_type,ds.country_code
+from dim_products dp
+inner join orders_table o on o.product_code = dp.product_code
+inner join dim_store_details ds on ds.store_code = o.store_code
+where ds.country_code = 'DE'
+group by ds.store_type , ds.country_code
+order by total_sales;
+
+-- How quickly is the company making sales?
+
+with time_stamps as(
+    select year,
+    TO_TIMESTAMP(year||'-'||LPAD(month::Text,2,'0')||'-'||LPAD(day::Text,2,'0')||timestamp,'YYYY-MM-DDHH24:MI:SS:MS'
+    ) AS combined_stamp
+from dim_date_times
+),
+sales_intervals as(
+    select year,
+    combined_stamp,
+    lead(combined_stamp) over(partition by year order by combined_stamp) as next_combined_stamp
+    from time_stamps
+)
+select year,
+avg(next_combined_stamp - combined_stamp) as actual_time_taken
+from sales_intervals
+group by year
+order by actual_time_taken desc;
+
